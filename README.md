@@ -39,7 +39,7 @@ func main() {
     zbxUrl := "http:/127.0.0.1/zabbix"
 	zbxUsername := "Admin"
 	zbxPassword := "zabbix"
-    zbx := zabbix.Zabbix{}
+    zbx := Zabbix{}
 	zapi, flag := zbx.Login(zbxUrl,zbxUsername,zbxPassword)
 	if flag == false {
 	    fmt.Println("zabbix login fail")
