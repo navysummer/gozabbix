@@ -3,60 +3,44 @@
 ## api 
 ```GO
 package main
+
 import (
-    "fmt"
-    "github.com/navysummer/gozabbix"
+	"fmt"
+
+	"github.com/navysummer/gozabbix"
 )
 
-type Zabbix struct {
-	url string
-	username string
-	password string
-	
-}
-
-func (zbx *Zabbix) GetHost(api *gozabbix.API,host string)(gozabbix.JsonRPCResponse, error){
-	params := make(map[string]interface{},0)
-	params["output"] = []string{"hostid", "host", "name"}
-	params["selectGroups"] = "extend"
-	params["selectParentTemplates"] = []string{"templateid", "name"}
-	filter := make(map[string]interface{},0)
-	if host != ""{
-		filter["host"] = host
-	}
-	if len(filter) != 0{
-		params["filter"] = filter
-	}
+func GetHost(api *gozabbix.API, host string) (gozabbix.JsonRPCResponse, error) {
+	params := make(map[string]interface{}, 0)
+	filter := make(map[string]string, 0)
+	filter["host"] = host
+	params["filter"] = filter
+	params["output"] = "extend"
 	method := "host.get"
-	response, err := api.ZabbixRequest(method,params)
-	if err != nil {
-		fmt.Printf("get host(parmas=%v) fail,message:%v",params,err.Error())
-	}
+	fmt.Println(params)
+	response, err := api.ZabbixRequest(method, params)
 	return response, err
 }
 
 func main() {
-    zbxUrl := "http:/127.0.0.1/zabbix"
-	zbxUsername := "Admin"
-	zbxPassword := "zabbix"
-    zbx := Zabbix{}
-	zapi, flag := zbx.Login(zbxUrl,zbxUsername,zbxPassword)
-	if flag == false {
-	    fmt.Println("zabbix login fail")
-		os.Exit(500)
-	}
-    fmt.Println("Connected to API")
-	zbx := Zabbix{"http:/ip:port/zabbix","username","password"}
-	host := "Zabbix Server"
-	ghost,err := zbx.GetHost(api,host)
+	api, err := gozabbix.NewAPI("http://ip:port/zabbix/api_jsonrpc.php", "Admin", "zabbix")
 	if err != nil {
-        fmt.Println(err)
-        return
-    }
-	fmt.Println(ghost)
+		fmt.Println(err)
+		return
+	}
+	_, err = api.Login()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	host := "Zabbix server"
+	ghost, err := GetHost(api, host)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(ghost.Result)
 }
-
-
 
 ```
 
